@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  hashedPassword String
+  createdAt      DateTime  @default(now())
+  media          MediaAsset[]
+}
+
+model MediaAsset {
+  id        Int       @id @default(autoincrement())
+  title     String
+  type      MediaType
+  fileUrl   String
+  createdAt DateTime  @default(now())
+  ownerId   Int
+  owner     AdminUser @relation(fields: [ownerId], references: [id])
+  views     MediaViewLog[]
+}
+
+enum MediaType {
+  video
+  audio
+}
+
+model MediaViewLog {
+  id          Int       @id @default(autoincrement())
+  mediaId     Int
+  media       MediaAsset @relation(fields: [mediaId], references: [id])
+  viewedByIp  String
+  timestamp   DateTime   @default(now())
+}
