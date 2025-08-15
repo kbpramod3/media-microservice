@@ -30,9 +30,11 @@ Client → Routes → Controllers → Services → Database (Prisma/MySQL) / Red
 * `Redis` caches analytics and stores blacklisted tokens
 * `Middlewares` handle authentication, rate-limiting, file upload, and errors
 
-🗂️ File Structure
+## 🗂️ File Structure
+
 The project follows a modular and organized structure to ensure maintainability and scalability.
 
+```
 backend/
 ├── .env.example              # Template for environment variables
 ├── .gitignore                # Specifies files to be ignored by Git
@@ -78,7 +80,7 @@ backend/
 │   └── authTest.js           # Tests for authentication
 │
 └── uploads/                  # Directory for storing uploaded files
-
+```
 
 ## 🔐 Authentication & Authorization
 
