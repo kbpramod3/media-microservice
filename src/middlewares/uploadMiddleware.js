@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 
-const uploadDir = "uploads/media";
+const uploadDir = process.env.UPLOAD_DIR || "uploads/media";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

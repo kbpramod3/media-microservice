@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import mime from "mime";
 import { createStreamToken } from "../utils/signer.js";
+import { redis } from "../config/redis.js";
 
 export async function addMedia(file, mediaId, ownerId) {
   const title = path.basename(file.originalname, path.extname(file.originalname));
@@ -49,18 +50,29 @@ export async function logView(mediaId, ip) {
   await prisma.mediaViewLog.create({
     data: { mediaId, viewedByIp: ip }
   });
+  const key = `media:analytics:${mediaId}`;
+  await redis.del(key);
   return { ok: true };
 }
 
 export async function getAnalytics(mediaId) {
   const media = await prisma.mediaAsset.findUnique({ where: { id: mediaId } });
   if (!media) throw new Error("Media not found");
+
+  const key = `media:analytics:${mediaId}`;
+
+  const cached = await redis.get(key);
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
   const totalViews = await prisma.mediaViewLog.count({ where: { mediaId } });
   const distinctIps = await prisma.mediaViewLog.findMany({
     where: { mediaId },
     select: { viewedByIp: true },
     distinct: ["viewedByIp"]
   });
+
   const perDayRows = await prisma.$queryRaw`
     SELECT DATE(timestamp) AS day, COUNT(*) AS views
     FROM MediaViewLog
@@ -68,12 +80,21 @@ export async function getAnalytics(mediaId) {
     GROUP BY day
     ORDER BY day
   `;
+
   const viewsPerDay = Object.fromEntries(
-    perDayRows.map(r => [new Date(r.day).toISOString().slice(0,10), Number(r.views)])
+    perDayRows.map(r => [
+      new Date(r.day).toISOString().slice(0, 10),
+      Number(r.views)
+    ])
   );
-  return {
+
+  const payload = {
     total_views: totalViews,
     unique_ips: distinctIps.length,
     views_per_day: viewsPerDay
   };
+
+  await redis.set(key, JSON.stringify(payload), "EX", 600);
+  return payload;
 }
+

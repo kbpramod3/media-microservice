@@ -3,4 +3,4 @@ node_modules
 src/uploads
 !src/uploads/.gitkeep
 /src/generated/prisma
-src/uploads/media
+uploads/media
