@@ -1,4 +1,4 @@
-# Klantroef Media Platform (Node.js / Express / MySQL / Redis)
+# Media Platform (Node.js / Express / MySQL / Redis)
 
 A backend microservice for managing media assets (audio/video) with secure streaming, analytics tracking, and JWT-based authentication. Admin users can upload media, generate temporary streaming links, and track who watched what and when.
 
